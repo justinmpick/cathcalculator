@@ -179,44 +179,7 @@
   </div>
 </section>
 
-<section class="annotator-card" id="diagram-annotator">
-  <h2 style="margin:0 0 8px">Cardiac Diagram</h2>
-  <div class="annotator-toolbar">
-    <div class="group">
-      <label class="annotator-btn">Upload <input id="annoUpload" type="file" accept="image/*,.pdf" style="display:none"></label>
-      <button class="annotator-btn" id="toolSelect" title="Select/Move">Select</button>
-      <button class="annotator-btn" id="toolDraw" title="Free Draw">Draw</button>
-      <button class="annotator-btn" id="toolArrow" title="Arrow">Arrow</button>
-      <button class="annotator-btn" id="toolText" title="Text">Text</button>
-<button class="annotator-btn" id="toolErase" title="Eraser">Eraser</button>
-    </div>
-    <div class="group">
-      <label>Stroke <input id="annoStroke" type="color" class="annotator-input" value="#1f6feb"></label>
-      <label>Width <input id="annoWidth" type="number" class="annotator-input" min="1" max="12" value="3" style="width:64px"></label>
-    </div>
-    <div class="group">
-      <button class="annotator-btn" id="annoUndo">Undo</button>
-      <button class="annotator-btn" id="annoClear">Clear</button>
-    </div>
-    <div class="group" style="margin-left:auto"><button class="annotator-btn" id="exportCombined">Export Combined PNG</button> <label class="annotator-btn" style="gap:6px;display:inline-flex;align-items:center">Include: <label style="display:inline-flex;gap:4px;align-items:center;margin-left:6px"><input type="checkbox" id="exportC1" checked> 1</label><label style="display:inline-flex;gap:4px;align-items:center;margin-left:6px"><input type="checkbox" id="exportC2"> 2</label><label style="display:inline-flex;gap:4px;align-items:center;margin-left:6px"><input type="checkbox" id="exportC3"> 3</label></label> 
-      <button class="annotator-btn" id="exportPNG">Export PNG</button>
-      <button class="annotator-btn" id="exportJSON">Save JSON</button>
-      <label class="annotator-btn">Load JSON <input id="importJSON" type="file" accept="application/json" style="display:none"></label>
-    </div>
-  </div>
-  
-  <!-- Patient banner shown above diagram -->
-  <div id="patientBanner" class="patient-banner">
-    <strong>Name:</strong> <span id="bnName">—</span>
-    &nbsp;•&nbsp; <strong>DOB:</strong> <span id="bnDob">—</span>
-    &nbsp;•&nbsp; <strong>MRN:</strong> <span id="bnMrn">—</span>
-  </div>
 
-<div class="annotator-canvas-wrap">
-    <canvas id="annoCanvas" width="1200" height="800"></canvas>
-  </div>
-  <div class="annotator-note">Tip: upload a diagram (PNG/JPG/SVG), add arrows/labels or draw. Export PNG for reports, or Save/Load JSON to keep layers editable.</div>
-</section>
 
 <!-- Hidden VO2 datasets (kept in DOM for parsing by the calculator) -->
 <style>
