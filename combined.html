@@ -61,7 +61,234 @@
     tr:nth-child(even) {
       background-color: #f8f9fa;
     }
-  
+
+	  <hr style="margin:40px 0;border:0;border-top:2px solid #dee2e6;">
+<section class="combined-diagram-section" id="diagramEditorSection">
+  <h2>Cardiac Diagram Editor</h2>
+  <h2>Diagram Editor</h2>
+
+<div class="patient-info">
+  <label>Name: <input type="text" id="patientName"></label>
+  <label>MRN: <input type="text" id="mrn"></label>
+  <label>DOB: <input type="date" id="dob"></label>
+</div>
+
+<div class="toolbar">
+  <select id="diagramSelect">
+    <option value="">-- Select Diagram --</option>
+    <option value="diagrams/normal.png">Normal Diagram</option>	
+    <option value="diagrams/Abberant RSC.bmp">Abberant RSVC Diagram</option>
+    <option value="diagrams/AP window.bmp">AP Window Diagram</option>
+    <option value="diagrams/apical muscular VSD PFO.bmp">apical muscular VSD PFO Diagram</option>
+    <option value="diagrams/Arterial Switch, VSD closure.bmp">Arterial Switch, VSD closure</option>
+    <option value="diagrams/ASD device.png">ASD Device Diagram</option>
+    <option value="diagrams/ASD Secundum.bmp">ASD Secundum Diagram</option>
+    <option value="diagrams/ASD, VSD, PAB.bmp">ASD, VSD, PAB</option>
+    <option value="diagrams/AVC Left dominant.bmp">AVC Left dominant Diagram</option>
+    <option value="diagrams/AVC PFO.bmp">AVC PFO Diagram</option>
+    <option value="diagrams/AVC.repaired.bmp">AVC Repaired Diagram</option>
+    <option value="diagrams/Cardioform ASD.png">Cardioform ASD</option>
+    <option value="diagrams/Coarctation CoA VSD.bmp">Coarctation CoA VSD Diagram</option>
+    <option value="diagrams/Coarctation Stent.jpg">Coarctation Stent Diagram</option>
+    <option value="diagrams/Coronary diagram_cath.png">Coronary Diagram</option>
+    <option value="diagrams/Dextrocardia mirror image, LAo.bmp">Dextrocardia Left Arch</option>
+    <option value="diagrams/Dextrocardia, DORV, LTGA, ASD.bmp">Dextrocardia, DORV, LTGA, ASD</option>
+    <option value="diagrams/dorvdtga.png">DORVDTGA Diagram</option>
+    <option value="diagrams/Ebsteins asd vsd.bmp">Ebsteins asd vsd</option>
+    <option value="diagrams/Ebsteins Cone.bmp">Ebsteins Cone Repair</option>
+    <option value="diagrams/HLHS MA AA.png">HLHS MA AA Diagram</option>
+    <option value="diagrams/HLHS Glenn.png">HLHS Glenn</option>
+    <option value="diagrams/HLHS, Fontan, LPA Stent.bmp">HLHS Fontan</option>
+    <option value="diagrams/HLHS, Norwood, BTS - AS MS.png">HLHS, Norwood BTS-AS MS</option>
+    <option value="diagrams/PA IVS with PDA stent.bmp">PA IVS with PDA stent</option>
+    <option value="diagrams/PA IVS with PDA Stent.bmp">PA IVS with PDA Stent</option>
+    <option value="diagrams/PA, IVS, Glenn.bmp">PA, IVS, Glenn</option>
+    <option value="diagrams/RAo mirror image.bmp">RAo mirror image</option>
+    <option value="diagrams/TA no VSD.bmp">TA No VSD</option>
+    <option value="diagrams/TGA, ASD, PDA.bmp">TGA, ASD, PDA</option>
+    <option value="diagrams/TGA Senning.bmp">TGA Senning</option>
+    <option value="diagrams/Tricuspid Dysplasia.bmp">Tricuspid Dysplasia</option>
+    <option value="diagrams/ToF-PDA.bmp">TOF-PDA</option>
+    <option value="diagrams/Absent PA.bmp">TOF-PA</option>
+    <option value="diagrams/Yasui.bmp">Yasui</option>
+    <option value="diagrams/1.5V Repair, small RV.bmp">1.5 V Repair Diagram</option>
+  </select>
+  <button onclick="loadDiagram()">Load Diagram</button>
+  <input type="file" id="upload" accept="image/*">
+  <button onclick="setTool('draw')">✏️ Draw</button>
+  <button onclick="setTool('erase')">🧽 Erase</button>
+  <button onclick="clearCanvas()">🗑 Clear</button>
+  <br>
+  Color: <input type="color" id="color" value="#000000">
+  Size: <input type="range" id="size" min="1" max="30" value="1">
+</div>
+
+<canvas id="canvas" width="900" height="550"></canvas>
+</section>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let drawing = false;
+let tool = 'draw';
+let currentImage = null;
+const headerHeight = 50;
+
+// TOOL
+function setTool(t) {
+  tool = t;
+}
+
+// DRAWING
+canvas.addEventListener('mousedown', (e) => {
+  drawing = true;
+  ctx.beginPath();
+  draw(e);
+});
+
+canvas.addEventListener('mousemove', draw);
+
+canvas.addEventListener('mouseup', () => {
+  drawing = false;
+  ctx.beginPath();
+});
+
+function draw(e) {
+  if (!drawing) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  // Prevent drawing over header
+  if (y < headerHeight) return;
+
+  const size = document.getElementById('size').value;
+  const color = document.getElementById('color').value;
+
+  ctx.lineWidth = size;
+  ctx.lineCap = 'round';
+
+  if (tool === 'erase') {
+    ctx.globalCompositeOperation = 'destination-out';
+  } else {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = color;
+  }
+
+  ctx.lineTo(x, y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+}
+
+// CLEAR
+function clearCanvas() {
+  currentImage = null;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawPatientInfo();
+}
+
+// HEADER
+function drawPatientInfo() {
+  const name = document.getElementById('patientName').value;
+  const mrn = document.getElementById('mrn').value;
+  const dob = document.getElementById('dob').value;
+
+  // Background
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, canvas.width, headerHeight);
+
+  // Border
+  ctx.strokeStyle = "black";
+  ctx.beginPath();
+  ctx.moveTo(0, headerHeight);
+  ctx.lineTo(canvas.width, headerHeight);
+  ctx.stroke();
+
+  ctx.fillStyle = "black";
+  ctx.font = "bold 16px Arial";
+
+  // Left
+  ctx.textAlign = "left";
+  ctx.fillText(`Name: ${name}`, 10, 30);
+
+  // Center
+  ctx.textAlign = "center";
+  ctx.fillText(`MRN: ${mrn}`, canvas.width / 2, 30);
+
+  // Right
+  ctx.textAlign = "right";
+  ctx.fillText(`DOB: ${dob}`, canvas.width - 10, 30);
+
+  ctx.textAlign = "left";
+}
+
+// MASTER RENDER
+function renderAll() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (currentImage) {
+    const scale = Math.min(
+      canvas.width / currentImage.width,
+      (canvas.height - headerHeight) / currentImage.height
+    );
+
+    const w = currentImage.width * scale;
+    const h = currentImage.height * scale;
+
+    ctx.drawImage(
+      currentImage,
+      (canvas.width - w)/2,
+      headerHeight + (canvas.height - headerHeight - h)/2,
+      w,
+      h
+    );
+  }
+
+  drawPatientInfo();
+}
+
+// LOAD DROPDOWN
+function loadDiagram() {
+  const url = document.getElementById('diagramSelect').value;
+  if (!url) return;
+
+  const img = new Image();
+  img.onload = function() {
+    currentImage = img;
+    renderAll();
+  }
+  img.src = url;
+}
+
+// UPLOAD
+document.getElementById('upload').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const img = new Image();
+    img.onload = function() {
+      currentImage = img;
+      renderAll();
+    }
+    img.src = event.target.result;
+  }
+  reader.readAsDataURL(file);
+});
+
+// LIVE HEADER UPDATES
+document.getElementById('patientName').addEventListener('input', renderAll);
+document.getElementById('mrn').addEventListener('input', renderAll);
+document.getElementById('dob').addEventListener('input', renderAll);
+
+// INITIAL DRAW
+drawPatientInfo();
+</script>
+</body>
+</html>
 
 /* ChatGPT Injected Fix: Equalize condition titles at 18px */
 .output h2, .condition-title {
