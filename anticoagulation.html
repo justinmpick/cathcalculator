@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NICU Post Cath Anticoagulation Calculator</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --muted: #6b7280;
+      --text: #111827;
+      --accent: #2563eb;
+      --ok: #16a34a;
+      --warn: #ca8a04;
+      --bad: #dc2626;
+      --shadow: 0 6px 20px rgba(0,0,0,0.08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text); background: #f7fafc; padding: 24px; }
+    h1 { font-weight: 800; letter-spacing: 0.2px; margin: 0 0 8px; font-size: 1.4rem; }
+    p.lead { margin-top: 0; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .card { background: var(--panel); border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+    .span-12{grid-column: span 12;} .span-6{grid-column: span 6;} .span-4{grid-column: span 4;} .span-3{grid-column: span 3;}
+    @media (max-width: 980px){ .span-6,.span-4,.span-3{grid-column: span 12;} }
+    .field { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .field label { color: var(--muted); font-size: 0.9rem; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    input[type="number"], select, input[type="text"], input[type="time"] {
+      width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #d1d5db; background: #ffffff; color: var(--text);
+      outline: none; box-shadow: inset 0 1px 0 rgba(0,0,0,0.02);
+    }
+    .switch { display: inline-flex; align-items: center; gap: 8px; }
+    .switch input { transform: scale(1.2); accent-color: var(--accent); }
+    .btn { background: var(--accent); color: #ffffff; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 700; cursor:pointer; transition: 0.2s transform ease, 0.2s opacity ease; }
+    .btn.secondary { background: #ffffff; color: var(--text); border: 1px solid #d1d5db; }
+    .btn:active { transform: translateY(1px); }
+    .result { border-left: 4px solid var(--accent); padding-left: 12px; background:#ffffff; }
+    .pill { display:inline-block; padding: 6px 10px; border-radius: 999px; font-weight:700; }
+    .ok{ background:#ecfdf5; color:#065f46; }
+    .warn{ background:#fffbeb; color:#92400e; }
+    .bad{ background:#fef2f2; color:#991b1b; }
+    .muted{ color: var(--muted); }
+    hr { border: none; border-top: 1px dashed #e5e7eb; margin: 14px 0; }
+    .footnote { font-size: 0.85rem; color: var(--muted); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    details { background: #f9fafb; padding: 10px 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
+    summary { cursor:pointer; font-weight:700; }
+    .section-title { font-size: 0.95rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 4px 0 12px; }
+    .card .section-title { border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+    .hide{ display:none; }
+  </style>
+</head>
+<body>
+  <header class="span-12">
+    <h1>NICU Post Cath Anticoagulation Calculator</h1>
+  </header>
+  <main class="grid">
+    <section class="card span-6">
+      <div class="section-title">Patient</div>
+      <div class="field"><label>Weight (kg)</label><input id="weight" type="number" min="0" step="0.01" placeholder="e.g., 4.2" /></div>
+      <hr>
+      <div class="section-title">Clinical Context</div>
+      <div class="field"><label>Post PDA stent placement? <span class="muted">(optional; Anti‑Xa logic doesn’t depend on this)</span></label><div class="switch"><input id="postPDA" type="checkbox" /></div></div>
+      <div class="field"><label>Distal extremity pulse present?</label><select id="distalPulse"><option value="unknown">— select —</option><option value="present">Present</option><option value="absent">Absent</option></select></div>
+      <div class="field"><label>Capillary refill time</label><select id="capRefill"><option value="unknown">— select —</option><option value="lt3">&lt; 3 seconds</option><option value="ge3">≥ 3 seconds</option></select></div>
+      <div class="field"><label>Color</label><select id="color"><option value="unknown">— select —</option><option value="appropriate">Appropriate</option><option value="pale">Pale</option></select></div>
+      <div class="row" style="margin-top:8px;"><button class="btn" id="calcBtn" type="button">Run Calculations</button><button class="btn secondary" id="resetBtn" type="button">Reset</button></div>
+      <p class="footnote">Tip: Use the Anti‑Xa panel to manage heparin rates and adjustments.</p>
+    </section>
+    <section class="card span-6">
+      <div class="section-title">Anti‑Xa Management</div>
+      <div class="field"><label>Agent</label><div><label style="margin-right:12px;"><input type="radio" name="agent" id="agentHeparin" value="heparin" checked> Heparin</label><label><input type="radio" name="agent" id="agentLovenox" value="lovenox"> Lovenox (enoxaparin)</label></div></div>
+      <div class="field" id="goalRow"><label>Anti‑Xa Goal</label><div id="goalText" class="pill ok">0.3–0.8 IU/mL (heparin)</div></div>
+      <div class="field" id="antiXaRow"><label>Current Anti‑Xa (IU/mL)</label><input id="antiXa" type="number" step="0.01" placeholder="e.g., 0.25" /></div>
+      <div class="field" id="hepRateRow"><label>Current heparin rate (u/kg/hr)</label><input id="ratePerKg" type="number" min="0" step="0.1" placeholder="e.g., 30" value="30" /></div>
+      <div class="field hide" id="lovenoxDoseRow"><label>Lovenox dose (mg/kg/dose)</label><input id="lovenoxDosePerKg" type="number" min="0" step="0.01" value="1.5" /></div>
+      <div class="row" style="margin-top:8px;"><button class="btn" id="antiXaBtn" type="button">Evaluate Anti‑Xa &amp; Dosing</button></div>
+      <hr><div id="pdaOut" class="result"></div>
+    </section>
+    <section class="card span-12">
+      <div class="section-title">Outputs</div><div id="mainOut" class="result"></div>
+      <details style="margin-top:10px"><summary>Protocol Summary</summary><ul>
+        <li><strong>Anti‑Xa management:</strong> Start heparin 30 u/kg/hr; check Anti‑Xa at 4h (goal 0.3–0.8). If in range → continue. If out of range → bolus 50 u/kg and increase rate by 20%; recheck in 6h; repeat until in range.</li>
+        <li><strong>Post cath (no stent):</strong> If cap refill &lt;3s with distal pulse present and good color → observe. If distal pulse absent → bolus 100 u/kg heparin and recheck in 2h; if still cool/pulseless → repeat 50 u/kg and start infusion 30 u/kg/hr. If still no pulse 4h after starting heparin → follow tPA protocol as above.</li>
+      </ul></details>
+      <p class="footnote">Always verify doses, concentrations, and pump programming per local policy. Adjust for clinical factors (bleeding risk, renal function, line patency, etc.).</p>
+    </section>
+    <section class="card span-12">
+      <div class="section-title">Built‑in Tests</div><div class="row" style="gap:12px; align-items:center;"><button class="btn" id="testsRunBtn" type="button">Run Built‑in Tests</button><span class="muted">(Checks core calculations: boluses, drips, Anti‑Xa adjustments)</span></div>
+      <div id="testOut" class="result" style="margin-top:8px;"></div><p class="footnote">Tests validate 20% rate uptitration math from the u/kg/hr input.</p>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const fmt = (n, d=0) => (Number.isFinite(n) ? Number(n).toFixed(d) : "—");
+    function calcHeparinBolus100(kg){ return kg * 100; }
+    function calcHeparinBolus50(kg){ return kg * 50; }
+    function calcHeparinStartRate(kg){ return kg * 30; }
+    function suggestIncrease20(rate){ return rate * 1.2; }
+    function getInputs(){ return {weight:parseFloat($("weight").value),postPDA:$("postPDA").checked,distalPulse:$("distalPulse").value,capRefill:$("capRefill").value,color:$("color").value,antiXa:parseFloat($("antiXa").value),ratePerKg:parseFloat($("ratePerKg").value),agent:$("agentLovenox").checked?'lovenox':'heparin',lovenoxDosePerKg:parseFloat($("lovenoxDosePerKg").value)}; }
+    function calcMain(){
+      const i=getInputs(); $("pdaOut").innerHTML=""; const msgs=[];
+      if(!i.weight||i.weight<=0){$("mainOut").innerHTML='<p class="pill bad">Enter a valid weight in kg to compute doses.</p>';return;}
+      const capOK=i.capRefill==='lt3', pulsePresent=i.distalPulse==='present', colorOK=i.color==='appropriate';
+      if(!pulsePresent){
+        const bolus100=calcHeparinBolus100(i.weight);
+        msgs.push('<div><p class="pill bad">Distal pulse absent → initiate limb perfusion protocol.</p><ul><li><strong>Heparin bolus:</strong> <span class="mono">'+fmt(i.weight,2)+' kg × 100 u/kg = '+fmt(bolus100,2)+' u</span>.</li><li>Recheck distal perfusion in <strong>2 hours</strong>.</li><li>If still cool/pulseless: repeat <strong>50 u/kg</strong> and start heparin infusion at <strong>30 u/kg/hr</strong>.</li><li>If still no pulse 4 hours after starting heparin: follow the tPA protocol.</li></ul></div>');
+      } else if(capOK&&pulsePresent&&colorOK){
+        if(i.postPDA){
+          const asaLow=i.weight*3, asaHigh=i.weight*5, heparinStartUhr=calcHeparinStartRate(i.weight), plavix=i.weight*0.2;
+          msgs.push('<div><p class="pill ok">Reassuring exam (PDA stent selected) → Begin antiplatelet/anticoag plan:</p><ul><li><strong>Aspirin:</strong> <span class="mono">'+fmt(i.weight,2)+' kg × 3–5 mg/kg/day = '+fmt(asaLow,2)+'–'+fmt(asaHigh,2)+' mg/day</span>.</li><li><strong>Heparin infusion:</strong> continue for <strong>48 hours</strong> at <span class="mono">'+fmt(i.weight,2)+' kg × 30 u/kg/hr = '+fmt(heparinStartUhr,2)+' u/hr</span>; goal Anti‑Xa 0.3–0.8 IU/mL.</li><li>When within goal and clinically appropriate after 48h, <strong>transition to clopidogrel</strong> <span class="mono">'+fmt(i.weight,2)+' kg × 0.2 mg/kg/day = '+fmt(plavix,2)+' mg/day</span>.</li></ul></div>');
+        } else msgs.push('<p class="pill ok">Post‑cath: cap refill < 3s, distal pulse present, good color → Continue observation.</p>');
+      } else msgs.push('<p class="pill warn">Findings not fully reassuring. Monitor closely and reassess.</p>');
+      $("mainOut").innerHTML=msgs.join("");
+    }
+    function lovenoxAdjust(dosePerKg,antiXa){
+      const axa=antiXa;
+      if(!Number.isFinite(dosePerKg)||dosePerKg<=0||!Number.isFinite(axa)) return {nextDosePerKg:NaN,rec:'Invalid inputs'};
+      if(axa<0.25) return {nextDosePerKg:dosePerKg*1.25,rec:'Increase dose by 25%'};
+      if(axa>=0.35&&axa<=0.49) return {nextDosePerKg:dosePerKg*1.10,rec:'Increase dose by 10%'};
+      if(axa>=0.5&&axa<=1.0) return {nextDosePerKg:dosePerKg,rec:'Keep the same dose'};
+      if(axa>=1.1&&axa<=1.5) return {nextDosePerKg:dosePerKg*0.80,rec:'Decrease dose by 20%'};
+      if(axa>=1.6&&axa<=2.0) return {nextDosePerKg:dosePerKg*0.70,rec:'Hold next dose for 3 hours, check a trough level, and then decrease by 30%'};
+      if(axa>2.0) return {nextDosePerKg:dosePerKg*0.60,rec:'Hold all doses until Anti‑Xa is ~0.5 IU/mL, then decrease dose by 40%'};
+      return {nextDosePerKg:dosePerKg*1.20,rec:'Increase dose by ~20% (assumption for 0.25–0.34 IU/mL)'};
+    }
+    function evalAntiXaPanel(){
+      const i=getInputs();
+      if(!i.weight||i.weight<=0){$("pdaOut").innerHTML='<p class="pill bad">Enter weight in kg.</p>';return;}
+      if(!Number.isFinite(i.antiXa)){$("pdaOut").innerHTML='<p class="pill warn">Enter a current Anti‑Xa value to calculate the next step.</p>';return;}
+      let html='';
+      if(i.agent==='heparin'){
+        const currentPerKg=Number.isFinite(i.ratePerKg)?i.ratePerKg:30,currentAbs=i.weight*currentPerKg,inRange=i.antiXa>=0.3&&i.antiXa<=0.8,bolus50=i.weight*50;
+        $("goalText").textContent='0.3–0.8 IU/mL (heparin)';
+        if(inRange) html+='<p class="pill ok">Anti‑Xa '+fmt(i.antiXa,2)+' IU/mL is within goal (0.3–0.8). Continue current rate <span class="mono">'+fmt(currentAbs,2)+' u/hr</span> ('+fmt(currentPerKg,1)+' u/kg/hr). Recheck daily × 48 h.</p>';
+        else {const nextPerKg=suggestIncrease20(currentPerKg),nextAbs=i.weight*nextPerKg;html+='<p class="pill bad">Anti‑Xa '+fmt(i.antiXa,2)+' IU/mL is <em>out of range</em> for heparin.</p><ul><li><strong>Bolus heparin:</strong> <span class="mono">'+fmt(i.weight,2)+' kg × 50 u/kg = '+fmt(bolus50,2)+' u</span> now.</li><li><strong>Increase infusion rate by 20%:</strong> from <span class="mono">'+fmt(currentAbs,2)+' u/hr</span> ('+fmt(currentPerKg,1)+' u/kg/hr) to <span class="mono">'+fmt(nextAbs,2)+' u/hr</span> ('+fmt(nextPerKg,1)+' u/kg/hr).</li><li><strong>Recheck Anti‑Xa in 6 hours.</strong> Repeat until in range.</li></ul>';}
+      } else {
+        const dosePerKg=Number.isFinite(i.lovenoxDosePerKg)?i.lovenoxDosePerKg:1.5,doseAbs=i.weight*dosePerKg,{nextDosePerKg,rec}=lovenoxAdjust(dosePerKg,i.antiXa),nextDoseAbs=i.weight*nextDosePerKg;
+        $("goalText").textContent='0.5–1.0 IU/mL (lovenox)';
+        html+='<p class="pill '+((i.antiXa>=0.5&&i.antiXa<=1.0)?'ok':(i.antiXa<0.5?'warn':'bad'))+'">Anti‑Xa '+fmt(i.antiXa,2)+' IU/mL vs goal 0.5–1.0 IU/mL (lovenox).</p><ul><li><strong>Current scheduled dose:</strong> <span class="mono">'+fmt(i.weight,2)+' kg × '+fmt(dosePerKg,2)+' mg/kg = '+fmt(doseAbs,2)+' mg</span> <em>q12h</em>.</li><li><strong>Recommendation:</strong> '+rec+'.</li><li><strong>Next dose:</strong> <span class="mono">'+fmt(i.weight,2)+' kg × '+fmt(nextDosePerKg,2)+' mg/kg = '+fmt(nextDoseAbs,2)+' mg</span> <em>q12h</em>.</li><li><strong>Monitoring:</strong> Repeat Anti‑Xa <em>4–6 hours after dose</em> and adjust per above.</li><li><strong>Recommendation:</strong> Lovenox should continue for 6–12 weeks.</li></ul>';
+      }
+      $("pdaOut").innerHTML=html;
+    }
+    function resetAll(){["weight","antiXa","ratePerKg","lovenoxDosePerKg"].forEach(id=>$(id).value="");["postPDA","agentHeparin"].forEach(id=>{const el=$(id);if(el)el.checked=id==="agentHeparin";});$("agentLovenox").checked=false;["distalPulse","capRefill","color"].forEach(id=>$(id).value="unknown");$("mainOut").innerHTML="";$("pdaOut").innerHTML="";$("testOut").innerHTML="";updateAgentUI();}
+    $("calcBtn").addEventListener('click',calcMain);$("antiXaBtn").addEventListener('click',evalAntiXaPanel);$("resetBtn").addEventListener('click',resetAll);
+    function handleInputChange(){calcMain();$("pdaOut").innerHTML="";}
+    ["weight","postPDA","distalPulse","capRefill","color","antiXa","ratePerKg","lovenoxDosePerKg","agentHeparin","agentLovenox"].forEach(id=>{const el=$(id);if(el){el.addEventListener('input',handleInputChange);el.addEventListener('change',handleInputChange);}});
+    ["antiXa","ratePerKg","weight","lovenoxDosePerKg","agentHeparin","agentLovenox"].forEach(id=>{const el=$(id);if(el){const handler=()=>{updateAgentUI();evalAntiXaPanel();};el.addEventListener('input',handler);el.addEventListener('change',handler);}});
+    function updateAgentUI(){const lov=$("agentLovenox").checked;$("hepRateRow").classList.toggle('hide',lov);$("lovenoxDoseRow").classList.toggle('hide',!lov);$("goalText").textContent=lov?'0.5–1.0 IU/mL (lovenox)':'0.3–0.8 IU/mL (heparin)';}
+    function runTests(){const out=[];function assertEq(name,got,want){const ok=Math.abs(got-want)<1e-9;out.push(ok?'<span class="pill ok">PASS</span> '+name+' → <span class="mono">'+fmt(got,2)+'</span>':'<span class="pill bad">FAIL</span> '+name+' → got <span class="mono">'+fmt(got,2)+'</span>, want <span class="mono">'+fmt(want,2)+'</span>');return ok;}
+      assertEq("Bolus(100 u/kg) @ 4.0 kg",calcHeparinBolus100(4),400);assertEq("Bolus(50 u/kg) @ 4.0 kg",calcHeparinBolus50(4),200);assertEq("Start rate(30 u/kg/hr) @ 4.0 kg",calcHeparinStartRate(4),120);assertEq("Suggest +20% from 30",suggestIncrease20(30),36);assertEq("Suggest +20% from 18.5",suggestIncrease20(18.5),22.2);
+      const w2=5.0;assertEq("tPA bolus 0.1 mg/kg @ 5kg",w2*0.1,0.5);assertEq("tPA rate 0.2 mg/kg/hr @ 5kg",w2*0.2,1.0);assertEq("Heparin restart 30 u/kg/hr @ 5kg",calcHeparinStartRate(5),150);
+      const d=1.5;let r;r=lovenoxAdjust(d,0.20);assertEq("Lovenox <0.25 → +25%",r.nextDosePerKg,1.875);r=lovenoxAdjust(d,0.40);assertEq("Lovenox 0.35–0.49 → +10%",r.nextDosePerKg,1.65);r=lovenoxAdjust(d,0.70);assertEq("Lovenox 0.5–1.0 → same",r.nextDosePerKg,1.5);r=lovenoxAdjust(d,1.20);assertEq("Lovenox 1.1–1.5 → −20%",r.nextDosePerKg,1.2);r=lovenoxAdjust(d,1.80);assertEq("Lovenox 1.6–2.0 → hold then −30%",r.nextDosePerKg,1.05);r=lovenoxAdjust(d,2.10);assertEq("Lovenox >2.0 → hold until ~0.5 then −40%",r.nextDosePerKg,0.9);
+      $("testOut").innerHTML=out.map(s=>'<div>'+s+'</div>').join("");
+    }
+    updateAgentUI();$("testsRunBtn").addEventListener('click',runTests);
+  </script>
+</body>
+</html>
