@@ -516,6 +516,7 @@ function loadDiagram() {
   img.onload = function() {
     currentImage = img;
     renderAll();
+    saveUndoState();
   }
   img.src = url;
 }
@@ -531,6 +532,7 @@ document.getElementById('upload').addEventListener('change', function(e) {
     img.onload = function() {
       currentImage = img;
       renderAll();
+      saveUndoState();
     }
     img.src = event.target.result;
   }
@@ -543,9 +545,7 @@ document.getElementById('mrn').addEventListener('input', renderAll);
 document.getElementById('dob').addEventListener('input', renderAll);
 
 // INITIAL DRAW
-drawPatientInfo();
-
-// Initialize undo history with the current canvas state.
+// drawPatientInfo() is called here once; the following snapshot becomes the first undo state.
 drawPatientInfo();
 saveUndoState();
 </script>
