@@ -1,69 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hyperlipidemia Decision Support</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hyperlipidemia Decision Support (Standalone)</title>
 <style>
-:root{--bg:#fff;--card:#fff;--muted:#6b7280;--text:#1f2937;--warn:#b45309}
-*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-.container{max-width:1100px;margin:auto;padding:24px;display:grid;grid-template-columns:1fr;gap:24px}@media(min-width:960px){.container{grid-template-columns:1fr 1fr}}
-.card{background:var(--card);border:1px solid #e5e7eb;border-radius:16px}.content{padding:16px}.grid{display:grid;gap:12px}.cols2{grid-template-columns:1fr 1fr}.row{display:flex;gap:10px;align-items:center}
-label{font-size:14px}input[type=number]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e5e7eb}.btn{border:1px solid #d1d5db;background:#f9fafb;padding:10px 14px;border-radius:10px;cursor:pointer}
-.pill{background:#f8fafc;border:1px solid #e5e7eb;padding:10px;border-radius:12px}.muted{color:var(--muted)}.title{font-weight:600}.section-title{font-weight:600;margin-bottom:8px}.xl{font-size:22px;font-weight:700}.warn{color:var(--warn)}ul,ol{margin:6px 0 0 20px}
-@media(max-width:600px){.cols2{grid-template-columns:1fr}}
-</style></head>
-<body><div class="container">
-<div>
-<h1>Hyperlipidemia Decision Support</h1>
-<p class="muted">Educational tool. Not a substitute for clinical judgment. Use with validated references and local guidelines.</p>
-<div class="card"><div class="content"><div class="grid cols2">
-<div><label>Age (years)</label><input id="age" type="number" step="any" placeholder="e.g., 12 or 45"></div>
-<div><label>Weight (kg)</label><input id="weight" type="number" step="any" placeholder="e.g., 70"></div>
-<div><label>Fasting LDL (mg/dL)</label><input id="ldl" type="number" step="any" placeholder="e.g., 165"></div>
-<div><label>Height (cm)</label><input id="height" type="number" step="any" placeholder="e.g., 170"></div>
-<div><label>HDL (mg/dL) (optional)</label><input id="hdl" type="number" step="any" placeholder="--"></div>
-<div><label>Triglycerides (mg/dL) (optional)</label><input id="tg" type="number" step="any" placeholder="--"></div>
-</div><div class="row" style="margin-top:10px"><input type="checkbox" id="isFasting"><label for="isFasting">These are fasting labs</label></div>
-<div style="margin-top:10px"><button class="btn" id="resetBtn">Reset</button></div></div></div>
-<div class="card"><div class="content"><div class="section-title">Calculated Metrics</div><div class="pill"><div class="muted">BMI</div><div class="xl" id="bmiDisplay">—</div></div></div></div>
-<div class="card"><div class="content"><div class="section-title">Risk Factors</div><div class="grid cols2">
-<div><div class="muted title">High risk</div>
-<label class="row"><input type="checkbox" id="homozygousFH">Homozygous familial hypercholesterolemia</label>
-<label class="row"><input type="checkbox" id="diabetesT1">Type 1 Diabetes Mellitus</label>
-<label class="row"><input type="checkbox" id="diabetesT2">Type 2 Diabetes Mellitus</label>
-<label class="row"><input type="checkbox" id="kawasakiPersistentAneurysm">Kawasaki disease with persistent aneurysms</label>
-<label class="row"><input type="checkbox" id="solidOrganTxVasculopathy">Solid organ transplant vasculopathy</label></div>
-<div><div class="muted title">Moderate risk</div>
-<label class="row"><input type="checkbox" id="severeObesity">Severe Obesity (BMI&gt;35 or &gt;120% of CDC 95th %ile)</label>
-<label class="row"><input type="checkbox" id="heterozygousFH">Heterozygous familial hypercholesterolemia</label>
-<label class="row"><input type="checkbox" id="historyKawasaki">History of Kawasaki Disease</label></div>
-<div><div class="muted title">Family history</div><label class="row"><input type="checkbox" id="famHxEarlyASCVD">Family history of early CAD/stroke (M ≤55, F ≤65)</label></div>
-</div></div></div>
-</div>
-<div><div class="card"><div class="content"><div class="section-title">Output</div>
-<div id="flagsBlock" style="display:none"><div class="warn title">Flags</div><ul id="flagsList"></ul></div>
-<div id="planBlock" style="display:none"><div class="muted title">Plan / Guidance (based on your inputs)</div><ol id="planList"></ol></div>
-<div id="labsBlock" style="display:none"><div class="muted title">Order prior to starting statins</div><ul id="labsList"></ul></div>
-<div id="lifestyleBlock"><div class="muted title">Lifestyle guidance</div><ul><li>Diet: high fiber (fruits/vegetables, whole grains); favor mono/poly-unsaturated fats; limit saturated fat; avoid trans fats.</li><li>Physical activity: ≥5 hours/week of moderate to vigorous activity.</li></ul></div>
-<div id="goalBlock" class="pill" style="margin-top:8px"><div class="muted">Goal LDL</div><div id="goalLDL" class="title"></div></div>
-<p class="muted" style="font-size:12px">This tool is for education, not medical advice. Confirm thresholds and indications with current guidelines and patient-specific factors.</p>
-</div></div></div>
-</div>
+  /* Light (daytime) theme */
+  :root{--bg:#ffffff;--card:#ffffff;--muted:#6b7280;--text:#1f2937;--warn:#b45309}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,Helvetica,Arial,sans-serif}
+  .container{max-width:1100px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr;gap:24px}
+  @media(min-width:960px){.container{grid-template-columns:1fr 1fr}}
+  h1{margin:0 0 4px 0}
+  p.muted{color:var(--muted);margin:0 0 8px 0;font-size:14px}
+  .card{background:var(--card);border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 1px 0 #f3f4f6 inset}
+  .card .content{padding:16px}
+  .grid{display:grid;gap:12px}
+  .grid.cols-2{grid-template-columns:1fr 1fr}
+  .row{display:flex;gap:10px;align-items:center}
+  label{font-size:14px;color:var(--text)}
+  input[type="number"]{width:100%;padding:10px 12px;border-radius:10px;background:#ffffff;border:1px solid #e5e7eb;color:#111827}
+  .btn{appearance:none;border:1px solid #d1d5db;background:#f9fafb;color:#111827;padding:10px 14px;border-radius:10px;cursor:pointer}
+  .btn:hover{border-color:#94a3b8}
+  .pill{background:#f8fafc;border:1px solid #e5e7eb;padding:10px;border-radius:12px}
+  .title{font-weight:600}
+  .muted{color:var(--muted)}
+  ul,ol{margin:6px 0 0 20px}
+  .warn{color:var(--warn)}
+  .section-title{font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .xl{font-size:22px;font-weight:700}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:#6b7280}
+  .inline-note{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div>
+      <h1>Hyperlipidemia Decision Support</h1>
+      <p class="muted">Educational tool. Not a substitute for clinical judgment. Use with validated references and local guidelines.</p>
+
+      <div class="card"><div class="content">
+        <div class="grid cols-2">
+          <div>
+            <label>Age (years)</label>
+            <input id="age" type="number" step="any" placeholder="e.g., 12 or 45" />
+          </div>
+          <div>
+            <label>Weight (kg)</label>
+            <input id="weight" type="number" step="any" placeholder="e.g., 70" />
+          </div>
+          <div>
+            <label>Fasting LDL (mg/dL)</label>
+            <input id="ldl" type="number" step="any" placeholder="e.g., 165" />
+          </div>
+          <div>
+            <label>Height (cm)</label>
+            <input id="height" type="number" step="any" placeholder="e.g., 170" />
+          </div>
+          <div>
+            <label>HDL (mg/dL) (optional)</label>
+            <input id="hdl" type="number" step="any" placeholder="--" />
+          </div>
+          <div>
+            <label>Triglycerides (mg/dL) (optional)</label>
+            <input id="tg" type="number" step="any" placeholder="--" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <input type="checkbox" id="isFasting" />
+          <label for="isFasting" style="margin:0">These are fasting labs</label>
+          <span class="inline-note">(If unchecked and any lipid is entered, a reminder will appear.)</span>
+        </div>
+        <div style="margin-top:10px"><button class="btn" id="resetBtn">Reset</button></div>
+      </div></div>
+
+      <div class="card"><div class="content">
+        <div class="section-title">Calculated Metrics</div>
+        <div class="grid cols-2">
+          <div class="pill">
+            <div class="muted">BMI</div>
+            <div class="xl" id="bmiDisplay">—</div>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="card"><div class="content">
+        <div class="section-title">Risk Factors</div>
+        <div class="grid cols-2">
+          <div>
+            <div class="muted title">High risk</div>
+            <label class="row"><input type="checkbox" id="homozygousFH"/> Homozygous familial hypercholesterolemia</label>
+            <label class="row"><input type="checkbox" id="diabetesT1"/> Type 1 Diabetes Mellitus</label>
+            <label class="row"><input type="checkbox" id="diabetesT2"/> Type 2 Diabetes Mellitus</label>
+            <label class="row"><input type="checkbox" id="kawasakiPersistentAneurysm"/> Kawasaki disease with persistent aneurysms</label>
+            <label class="row"><input type="checkbox" id="solidOrganTxVasculopathy"/> Solid organ transplant vasculopathy</label>
+          </div>
+          <div>
+            <div class="muted title">Moderate risk</div>
+            <label class="row"><input type="checkbox" id="severeObesity"/> Severe Obesity (BMI>35 or >120% of CDC 95th %ile)</label>
+            <label class="row"><input type="checkbox" id="heterozygousFH"/> Heterozygous familial hypercholesterolemia</label>
+            <label class="row"><input type="checkbox" id="historyKawasaki"/> History of Kawasaki Disease</label>
+          </div>
+          <div>
+            <div class="muted title">Family history (used for risk tier and base rules)</div>
+            <label class="row"><input type="checkbox" id="famHxEarlyASCVD"/> Family history of early CAD/stroke (M ≤55, F ≤65)</label>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <div>
+      <div class="card"><div class="content">
+        <div class="section-title">Output</div>
+
+        <div id="flagsBlock" style="display:none">
+          <div class="warn title" style="margin-top:8px">Flags</div>
+          <ul id="flagsList"></ul>
+        </div>
+
+        <div id="planBlock" style="display:none">
+          <div class="muted title" style="margin-top:8px">Plan / Guidance (based on your inputs)</div>
+          <ol id="planList"></ol>
+        </div>
+
+        <div id="labsBlock" style="display:none">
+          <div class="muted title" style="margin-top:8px">Order prior to starting statins</div>
+          <ul id="labsList"></ul>
+        </div>
+
+        <div id="lifestyleBlock" style="margin-top:8px">
+          <div class="muted title">Lifestyle guidance</div>
+          <ul>
+            <li>Diet: high fiber (fruits/vegetables, whole grains); favor mono/poly‑unsaturated fats; limit saturated fat; avoid trans fats.</li>
+            <li>Physical activity: ≥5 hours/week of moderate to vigorous activity.</li>
+          </ul>
+        </div>
+
+        <div id="goalBlock" class="pill" style="margin-top:8px">
+          <div class="muted">Goal LDL</div>
+          <div id="goalLDL" class="title"></div>
+        </div>
+
+        <p class="kbd">This tool is for education, not medical advice. Confirm thresholds and indications with current guidelines and patient-specific factors.</p>
+      </div></div>
+    </div>
+  </div>
+
 <script>
-(()=>{const $=id=>document.getElementById(id),num=v=>{const n=parseFloat(v);return Number.isNaN(n)?NaN:n};
-const ids=['age','weight','height','ldl','hdl','tg','isFasting','famHxEarlyASCVD','homozygousFH','diabetesT1','diabetesT2','kawasakiPersistentAneurysm','solidOrganTxVasculopathy','severeObesity','heterozygousFH','historyKawasaki'];
-function risk(s){if(s.homozygousFH||s.diabetesT1||s.diabetesT2||s.kawasakiPersistentAneurysm||s.solidOrganTxVasculopathy)return'high';if(s.severeObesity||s.heterozygousFH||s.historyKawasaki)return'moderate';if(s.famHxEarlyASCVD)return'at';return'none'}
-function update(){const age=num($('age').value),weight=num($('weight').value),height=num($('height').value),ldl=num($('ldl').value),hdl=num($('hdl').value),tg=num($('tg').value);
-const s={famHxEarlyASCVD:$('famHxEarlyASCVD').checked,homozygousFH:$('homozygousFH').checked,diabetesT1:$('diabetesT1').checked,diabetesT2:$('diabetesT2').checked,kawasakiPersistentAneurysm:$('kawasakiPersistentAneurysm').checked,solidOrganTxVasculopathy:$('solidOrganTxVasculopathy').checked,severeObesity:$('severeObesity').checked,heterozygousFH:$('heterozygousFH').checked,historyKawasaki:$('historyKawasaki').checked};
-const bmi=(!Number.isNaN(weight)&&!Number.isNaN(height)&&height>0)?weight/Math.pow(height/100,2):NaN;$('bmiDisplay').textContent=Number.isNaN(bmi)?'—':bmi.toFixed(1)+' kg/m²';const level=risk(s),goal=level==='high'?100:130;$('goalLDL').textContent='< '+goal+' mg/dL'+(level==='high'?' (high risk)':'');
-const flags=[],plan=[];const fasting=$('isFasting').checked;if(!fasting&&[ldl,hdl,tg].some(x=>!Number.isNaN(x)))flags.push('Please obtain fasting labs for further interpretation');
-if(!Number.isNaN(tg)){if(tg>=500)plan.push('Fasting triglycerides >= 500 mg/dL: Consider pharmacotherapy with either Tricor (fenofibrate) or Lovaza');else if(tg>=150)plan.push('Triglycerides 150–500 mg/dL: consider lifestyle changes.');else plan.push('Triglycerides: no indications for intervention.')}
-if(!Number.isNaN(hdl)){if(hdl<40)plan.push('HDL < 40 mg/dL: encourage increased physical activity.');else plan.push('HDL: no indications for intervention.')}
-if(!Number.isNaN(ldl)){if(ldl<160)plan.push('LDL: No pharmacologic intervention necessary.');else if(ldl<190){if(!s.famHxEarlyASCVD)plan.push('LDL 160–189 without family history: no pharmacologic intervention necessary.');else plan.push('LDL ≥160 with family history of early CAD/stroke: recommend lifestyle changes for 6 months, then repeat fasting LDL. If repeat LDL remains >160, start a statin.')}else plan.push('LDL ≥190: recommend lifestyle changes for 6 months, then repeat fasting LDL.');
-if(level==='high'&&ldl>160){flags.push('High-risk condition present.');plan.push('High risk + LDL >160: start statin therapy with lifestyle changes.')}if(level==='moderate'&&ldl>160){flags.push('Moderate-risk condition present.');plan.push('Moderate risk + LDL >160: trial lifestyle changes for 3–6 months, then repeat fasting LDL. If still >160, start statin.')}}else flags.push('Fasting LDL not entered; LDL-based guidance not shown.');
-if(!Number.isNaN(bmi)&&bmi>35)flags.push('BMI >35 kg/m² (meets severe obesity criterion regardless of percentile).');
-const labs=['Fasting lipid panel','Creatine kinase (CK)','CBC','Electrolytes: Na, K, Cl, HCO₃, BUN, Cr, Glucose','HbA1c','TSH, free T4','Cortisol'];const statin=plan.some(p=>/start statin/i.test(p));
-$('flagsBlock').style.display=flags.length?'':'none';$('planBlock').style.display=fasting&&plan.length?'':'none';$('labsBlock').style.display=fasting&&statin?'':'none';$('lifestyleBlock').style.display=fasting?'':'none';$('goalBlock').style.display=fasting?'':'none';$('flagsList').innerHTML=flags.map(x=>'<li>'+x+'</li>').join('');$('planList').innerHTML=plan.map(x=>'<li>'+x+'</li>').join('');$('labsList').innerHTML=statin?labs.map(x=>'<li>'+x+'</li>').join(''):'';
-}
-ids.forEach(id=>{const e=$(id);e.addEventListener(e.type==='checkbox'?'change':'input',update)});$('resetBtn').addEventListener('click',()=>{['age','weight','height','ldl','hdl','tg'].forEach(id=>$(id).value='');ids.filter(id=>$(id).type==='checkbox').forEach(id=>$(id).checked=false);update()});update()})();
-</script></body></html>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  function safeNum(v){ const n = parseFloat(v); return isNaN(n) ? NaN : n; }
+  function cmToM(cm){ return cm/100; }
+  function round(n, d=1){ if (isNaN(n)) return NaN; const p = Math.pow(10,d); return Math.round(n*p)/p; }
+
+  const inputs = {
+    age: $('age'), weight: $('weight'), height: $('height'), ldl: $('ldl'), hdl: $('hdl'), tg: $('tg'), isFasting: $('isFasting'),
+    famHxEarlyASCVD: $('famHxEarlyASCVD'),
+    homozygousFH: $('homozygousFH'), diabetesT1: $('diabetesT1'), diabetesT2: $('diabetesT2'), kawasakiPersistentAneurysm: $('kawasakiPersistentAneurysm'), solidOrganTxVasculopathy: $('solidOrganTxVasculopathy'),
+    severeObesity: $('severeObesity'), heterozygousFH: $('heterozygousFH'), historyKawasaki: $('historyKawasaki')
+  };
+
+  function riskLevel(state){
+    const anyHigh = state.homozygousFH || state.diabetesT1 || state.diabetesT2 || state.kawasakiPersistentAneurysm || state.solidOrganTxVasculopathy;
+    if (anyHigh) return 'high';
+    const anyMod = state.severeObesity || state.heterozygousFH || state.historyKawasaki;
+    if (anyMod) return 'moderate';
+    if (state.famHxEarlyASCVD) return 'at';
+    return 'none';
+  }
+
+  function update(){
+    const age = safeNum(inputs.age.value);
+    const weight = safeNum(inputs.weight.value);
+    const height = safeNum(inputs.height.value);
+    const ldl = safeNum(inputs.ldl.value);
+    const hdl = safeNum(inputs.hdl.value);
+    const tg  = safeNum(inputs.tg.value);
+
+    const state = {
+      famHxEarlyASCVD: inputs.famHxEarlyASCVD.checked,
+      homozygousFH: inputs.homozygousFH.checked,
+      diabetesT1: inputs.diabetesT1.checked,
+      diabetesT2: inputs.diabetesT2.checked,
+      kawasakiPersistentAneurysm: inputs.kawasakiPersistentAneurysm.checked,
+      solidOrganTxVasculopathy: inputs.solidOrganTxVasculopathy.checked,
+      severeObesity: inputs.severeObesity.checked,
+      heterozygousFH: inputs.heterozygousFH.checked,
+      historyKawasaki: inputs.historyKawasaki.checked,
+    };
+
+    const bmi = (!isNaN(weight) && !isNaN(height) && height>0) ? weight / Math.pow(cmToM(height),2) : NaN;
+    $('bmiDisplay').textContent = isNaN(bmi) ? '—' : (round(bmi,1) + ' kg/m²');
+
+    const level = riskLevel(state);
+    const goal = (level === 'high') ? 100 : 130;
+    $('goalLDL').textContent = '< ' + goal + ' mg/dL' + (level==='high' ? ' (high risk)' : '');
+
+    const flags = [];
+    const plan = [];
+
+    // Reminder if labs are not fasting
+    const hasAnyLipid = !isNaN(ldl) || !isNaN(hdl) || !isNaN(tg);
+    if (!inputs.isFasting.checked && hasAnyLipid) {
+      flags.push('Please obtain fasting labs for further interpretation');
+    }
+
+    // Non-LDL guidance
+    if (!isNaN(tg)){
+      if (tg >= 500){
+        plan.push(`Fasting triglycerides >= 500 mg/dL: Consider pharmacotherapy with either Tricor (fenofibrate) or Lovaza`);  
+      } else if (tg >= 150 && tg < 500){
+        plan.push('Triglycerides 150–500 mg/dL: consider lifestyle changes.');
+      } else if (tg < 150){
+        if (!plan.includes('Triglycerides: no indications for intervention.')) plan.push('Triglycerides: no indications for intervention.');
+      }
+    }
+
+    if (!isNaN(hdl)){
+      if (hdl < 40){
+        plan.push('HDL < 40 mg/dL: encourage increased physical activity.');
+      } else if (hdl > 40){
+        if (!plan.includes('HDL: No indications for intervention.')) plan.push('HDL: no indications for intervention.');
+      }
+    }
+
+    // LDL-driven guidance
+    if (!isNaN(ldl)){
+      if (ldl < 160){
+        plan.push('LDL: No pharmacologic intervention necessary.');
+      } else if (ldl < 190){
+        if (!state.famHxEarlyASCVD){
+          plan.push('LDL 160–189 without family history: no pharmacologic intervention necessary.');
+        } else {
+          plan.push('LDL ≥160 with family history of early CAD/stroke: recommend lifestyle changes for 6 months, then repeat fasting LDL. If repeat LDL remains >160, start a statin.');
+        }
+      } else {
+        plan.push('LDL ≥190: recommend lifestyle changes for 6 months, then repeat fasting LDL.');
+      }
+
+      if (level === 'high' && ldl > 160){
+        flags.push('High-risk condition present.');
+        plan.push('High risk + LDL >160: start statin therapy with lifestyle changes.');
+      }
+      if (level === 'moderate' && ldl > 160){
+        flags.push('Moderate-risk condition present.');
+        plan.push('Moderate risk + LDL >160: trial lifestyle changes for 3–6 months, then repeat fasting LDL. If still >160, start statin.');
+      }
+    } else {
+      flags.push('Fasting LDL not entered; LDL-based guidance not shown.');
+    }
+
+    if (!isNaN(bmi) && bmi > 35){ flags.push('BMI >35 kg/m² (meets severe obesity criterion regardless of percentile).'); }
+
+    const labs = [
+      'Fasting lipid panel','Creatine kinase (CK)','CBC','Electrolytes: Na, K, Cl, HCO₃, BUN, Cr, Glucose','HbA1c','TSH, free T4','Cortisol'
+    ];
+    const statinIndicated = plan.some(p => /start statin/i.test(p));
+
+    toggleBlocks(flags, plan, statinIndicated ? labs : [], inputs.isFasting.checked);
+  }
+
+  function toggleBlocks(flags, plan, labs, isFasting){
+    const fb = $('flagsBlock'), pb = $('planBlock'), lb = $('labsBlock');
+    const fl = $('flagsList'), pl = $('planList'), ll = $('labsList');
+    const lifestyle = $('lifestyleBlock');
+    const goal = $('goalBlock');
+
+    fb.style.display = flags.length ? '' : 'none';
+
+    // Hide Plan/Lifestyle/Goal when NOT fasting
+    if (!isFasting){
+      pb.style.display = 'none';
+      if (lifestyle) lifestyle.style.display = 'none';
+      if (goal) goal.style.display = 'none';
+    } else {
+      pb.style.display = plan.length ? '' : 'none';
+      if (lifestyle) lifestyle.style.display = '';
+      if (goal) goal.style.display = '';
+    }
+
+    lb.style.display = labs.length ? '' : 'none';
+
+    fl.innerHTML = flags.map(s=>`<li>${s}</li>`).join('');
+    pl.innerHTML = plan.map(s=>`<li>${s}</li>`).join('');
+    ll.innerHTML = labs.map(s=>`<li>${s}</li>`).join('');
+  }
+
+  Object.values(inputs).forEach(el => {
+    const evt = (el.type === 'checkbox') ? 'change' : 'input';
+    el.addEventListener(evt, update);
+  });
+  $('resetBtn').addEventListener('click', () => {
+    ['age','weight','height','ldl','hdl','tg'].forEach(id => { $(id).value=''; });
+    ['famHxEarlyASCVD','homozygousFH','diabetesT1','diabetesT2','kawasakiPersistentAneurysm','solidOrganTxVasculopathy','severeObesity','heterozygousFH','historyKawasaki','isFasting']
+      .forEach(id => { $(id).checked = false; });
+    update();
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
