@@ -148,11 +148,13 @@
 #sitePanels{max-width:1200px;margin:0 auto}
 #cardiacPanel{display:block}
 #anticoagulationPanel{display:none}
+#hyperlipidemiaPanel{display:none}
 #anticoagulationFrame{width:100%;min-height:1050px;border:1px solid #dcdfe3;border-radius:10px;background:#fff;display:block}
 </style>
 <div id="siteTabs" role="tablist" aria-label="Pediatric cardiac tools">
 <button id="cardiacTab" class="active" role="tab" aria-selected="true" type="button">Cardiac Diagram Editor &amp; Hemodynamics</button>
 <button id="anticoagulationTab" role="tab" aria-selected="false" type="button">Post-Cath Anticoagulation</button>
+<button id="hyperlipidemiaTab" role="tab" aria-selected="false" type="button">Hyperlipidemia</button>
 </div>
 <div id="sitePanels"><div id="cardiacPanel">
 
@@ -2056,13 +2058,13 @@ let x = Math.floor((outW - aW)/2), y = PAD;
 <hr style="margin:40px 0;border:0;border-top:2px solid #dee2e6;">
 
 
-</div><div id="anticoagulationPanel"><iframe id="anticoagulationFrame" src="anticoagulation.html" title="NICU Post Cath Anticoagulation Calculator"></iframe></div></div>
+</div><div id="anticoagulationPanel"><iframe id="anticoagulationFrame" src="anticoagulation.html" title="NICU Post Cath Anticoagulation Calculator"></iframe></div><div id="hyperlipidemiaPanel"><iframe id="hyperlipidemiaFrame" src="hyperlipidemia.html" title="Hyperlipidemia Decision Support"></iframe></div></div>
 <script>
 (function(){
-const cardiacTab=document.getElementById('cardiacTab'), anticoagulationTab=document.getElementById('anticoagulationTab');
-const cardiacPanel=document.getElementById('cardiacPanel'), anticoagulationPanel=document.getElementById('anticoagulationPanel');
-function show(name){const cardiac=name==='cardiac';cardiacPanel.style.display=cardiac?'block':'none';anticoagulationPanel.style.display=cardiac?'none':'block';cardiacTab.classList.toggle('active',cardiac);anticoagulationTab.classList.toggle('active',!cardiac);cardiacTab.setAttribute('aria-selected',String(cardiac));anticoagulationTab.setAttribute('aria-selected',String(!cardiac));}
-cardiacTab.addEventListener('click',()=>show('cardiac'));anticoagulationTab.addEventListener('click',()=>show('anticoagulation'));
+const cardiacTab=document.getElementById('cardiacTab'), anticoagulationTab=document.getElementById('anticoagulationTab'), hyperlipidemiaTab=document.getElementById('hyperlipidemiaTab');
+const cardiacPanel=document.getElementById('cardiacPanel'), anticoagulationPanel=document.getElementById('anticoagulationPanel'), hyperlipidemiaPanel=document.getElementById('hyperlipidemiaPanel');
+function show(name){const cardiac=name==='cardiac';const anticoag=name==='anticoagulation';cardiacPanel.style.display=cardiac?'block':'none';anticoagulationPanel.style.display=anticoag?'block':'none';hyperlipidemiaPanel.style.display=(!cardiac&&!anticoag)?'block':'none';cardiacTab.classList.toggle('active',cardiac);anticoagulationTab.classList.toggle('active',anticoag);hyperlipidemiaTab.classList.toggle('active',!cardiac&&!anticoag);cardiacTab.setAttribute('aria-selected',String(cardiac));anticoagulationTab.setAttribute('aria-selected',String(anticoag));hyperlipidemiaTab.setAttribute('aria-selected',String(!cardiac&&!anticoag));}
+cardiacTab.addEventListener('click',()=>show('cardiac'));anticoagulationTab.addEventListener('click',()=>show('anticoagulation'));hyperlipidemiaTab.addEventListener('click',()=>show('hyperlipidemia'));
 })();
 </script>
 </body>
