@@ -1967,18 +1967,18 @@ let x = Math.floor((outW - aW)/2), y = PAD;
   }
 
   async function getAnnotatorImage(){
+    // Export the actual cardiac diagram shown in the editor, including the selected diagram.
+    const mainCanvas = document.getElementById('canvas');
+    const annotationCanvas = document.getElementById('annoCanvas');
     let url = null;
-    const domCanvas = document.getElementById('annoCanvas');
-    if (domCanvas && domCanvas.fabric?.toDataURL){
-      url = domCanvas.fabric.toDataURL({ format:'png', multiplier: 2 });
-    } else if (domCanvas) {
-      url = domCanvas.toDataURL('image/png');
+    if (mainCanvas && mainCanvas.width > 1 && mainCanvas.height > 1) {
+      url = mainCanvas.toDataURL('image/png');
+    } else if (annotationCanvas && annotationCanvas.fabric?.toDataURL) {
+      url = annotationCanvas.fabric.toDataURL({ format: 'png', multiplier: 2 });
+    } else if (annotationCanvas && annotationCanvas.width > 1) {
+      url = annotationCanvas.toDataURL('image/png');
     }
-    if (!url){
-      const t = document.createElement('canvas'); t.width=1; t.height=1;
-      t.getContext('2d').fillRect(0,0,1,1);
-      url = t.toDataURL('image/png');
-    }
+    if (!url) throw new Error('Could not capture the cardiac diagram. Please open the Cardiac Diagram Editor and select a diagram first.');
     const img = new Image();
     await new Promise((ok,err)=>{ img.onload=ok; img.onerror=err; img.src=url; });
     return img;
@@ -2116,9 +2116,14 @@ let x = Math.floor((outW - aW)/2), y = PAD;
     }
   }
 
-  // Bind/override exporter button
-  const btn = document.getElementById('exportCombined');
-  if (btn){ btn.onclick = null; btn.addEventListener('click', exportCombined_WITH_LOGO); }
+  // Replace the button to remove stale handlers from earlier exporter versions.
+  // Multiple old listeners were firing on one click and producing conflicting alerts.
+  const oldBtn = document.getElementById('exportCombined');
+  if (oldBtn){
+    const btn = oldBtn.cloneNode(true);
+    oldBtn.replaceWith(btn);
+    btn.addEventListener('click', exportCombined_WITH_LOGO);
+  }
   window.exportCombined_WITH_LOGO = exportCombined_WITH_LOGO;
 })();
 </script>
