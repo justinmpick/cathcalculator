@@ -2031,7 +2031,7 @@ let x = Math.floor((outW - aW)/2), y = PAD;
       const tilesRowWidth = tiles.reduce((s,t)=> s + t.w, 0) + GAP * Math.max(tiles.length-1, 0);
 
       const width  = Math.max(annoImg.width, tilesRowWidth);
-      const height = /* space for logo and header */ (PAD + 60 + 10) + /* header line */ 24 + /* content */ (annoImg.height + PAD + (tiles.length ? TITLE_H + rowHeight : 0) + PAD);
+      const height = /* logo plus content */ (PAD + 60 + PAD) + /* content */ (annoImg.height + PAD + (tiles.length ? TITLE_H + rowHeight : 0) + PAD);
 
       const out = document.createElement('canvas');
       out.width = width;
@@ -2058,24 +2058,8 @@ let x = Math.floor((outW - aW)/2), y = PAD;
         }
       }catch(_){}
 
-      // Patient header
-      try{
-        const nm = (document.getElementById('ptName')?.value || '—').trim() || '—';
-        const db = (document.getElementById('ptDob')?.value  || '—').trim() || '—';
-        const mr = (document.getElementById('ptMrn')?.value  || '—').trim() || '—';
-        const hdr = `Name: ${nm}   |   DOB: ${db}   |   MRN: ${mr}`;
-        const pad = PAD, top = PAD + 60 + 10; // below logo
-        ctx.save();
-        ctx.fillStyle = '#000000';
-        ctx.font = '16px sans-serif';
-        ctx.fillText(hdr, pad, top);
-        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-        ctx.beginPath(); ctx.moveTo(pad, top + 8); ctx.lineTo(width - pad, top + 8); ctx.stroke();
-        ctx.restore();
-      }catch(_){}
-
-      // Start content below logo & header
-      y = PAD + 60 + 10 + 24;
+      // Start content directly below the logo (no legacy patient header)
+      y = PAD + 60 + PAD;
 
       // Annotator top, centered
       let x = Math.floor((width - annoImg.width)/2);
