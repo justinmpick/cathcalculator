@@ -185,12 +185,61 @@
     button, input { margin: 5px; }
 
     .patient-info {
-      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px 14px;
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      text-align: left;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
     }
 
     .patient-info label {
-      margin: 0 10px;
-      font-weight: bold;
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+      margin: 0;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .patient-info input {
+      box-sizing: border-box;
+      height: 30px;
+      margin: 0;
+      padding: 5px 8px;
+      color: #1f2937;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font: 13px Arial, sans-serif;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .patient-info input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, .12);
+    }
+
+    .patient-info #patientName { width: 190px; }
+    .patient-info #mrn { width: 135px; }
+    .patient-info #dob { width: 145px; }
+
+    @media (max-width: 600px) {
+      .patient-info { align-items: flex-start; }
+      .patient-info label { width: 100%; }
+      .patient-info #patientName,
+      .patient-info #mrn,
+      .patient-info #dob { width: min(220px, 65vw); }
     }
   </style>
 </head>
