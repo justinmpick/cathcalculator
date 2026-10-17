@@ -1668,12 +1668,18 @@ try{
   }
   async function snap(el){ return await html2canvas(el, { backgroundColor:'#ffffff', scale:2, useCORS:true }); }
   async function getAnnotatorImage(){
+    // Prefer the annotation canvas when present; otherwise export the main cardiac diagram canvas.
     const c = document.getElementById('annoCanvas');
+    const diagramCanvas = document.getElementById('canvas');
     let url = null;
     if (c && c.fabric && typeof c.fabric.toDataURL === 'function'){
       url = c.fabric.toDataURL({ format:'png', multiplier:2 });
-    } else if (c) { url = c.toDataURL('image/png'); }
-    if (!url) throw new Error('Annotator canvas not found');
+    } else if (c) {
+      url = c.toDataURL('image/png');
+    } else if (diagramCanvas) {
+      url = diagramCanvas.toDataURL('image/png');
+    }
+    if (!url) throw new Error('No diagram canvas found. Please open the Cardiac Diagram Editor and try again.');
     const img = new Image();
     await new Promise((ok, err)=>{ img.onload=ok; img.onerror=err; img.src=url; });
     return img;
