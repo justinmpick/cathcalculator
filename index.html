@@ -252,12 +252,17 @@
 #cardiacPanel{display:block}
 #anticoagulationPanel{display:none}
 #hyperlipidemiaPanel{display:none}
-#anticoagulationFrame,#hyperlipidemiaFrame{width:100%;height:calc(100vh - 180px);min-height:900px;border:1px solid #dcdfe3;border-radius:10px;background:#fff;display:block}
+#echoZScoresPanel{display:none}
+#anticoagulationFrame,#hyperlipidemiaFrame,#phnZScoreFrame,#fetalZScoreFrame{width:100%;height:calc(100vh - 180px);min-height:900px;border:1px solid #dcdfe3;border-radius:10px;background:#fff;display:block}
+.echo-zscore-card{background:#f8f9fa;border:1px solid #dfe3e8;border-radius:10px;padding:14px;margin:14px 0}
+.echo-zscore-card h2{margin-top:0}
+.echo-zscore-note{font-size:13px;color:#555;line-height:1.45}
 </style>
 <div id="siteTabs" role="tablist" aria-label="Pediatric cardiac tools">
 <button id="cardiacTab" class="active" role="tab" aria-selected="true" type="button">Cardiac Diagram Editor &amp; Hemodynamics</button>
 <button id="anticoagulationTab" role="tab" aria-selected="false" type="button">Post-Cath Anticoagulation</button>
 <button id="hyperlipidemiaTab" role="tab" aria-selected="false" type="button">Hyperlipidemia</button>
+<button id="echoZScoresTab" role="tab" aria-selected="false" type="button">Echocardiogram Z scores</button>
 </div>
 <div id="sitePanels"><div id="cardiacPanel">
 
@@ -2165,13 +2170,42 @@ let x = Math.floor((outW - aW)/2), y = PAD;
 <hr style="margin:40px 0;border:0;border-top:2px solid #dee2e6;">
 
 
-</div><div id="anticoagulationPanel"><iframe id="anticoagulationFrame" src="anticoagulation.html" title="NICU Post Cath Anticoagulation Calculator"></iframe></div><div id="hyperlipidemiaPanel"><iframe id="hyperlipidemiaFrame" src="hyperlipidemia.html" title="Hyperlipidemia Decision Support"></iframe></div></div>
+</div><div id="anticoagulationPanel"><iframe id="anticoagulationFrame" src="anticoagulation.html" title="NICU Post Cath Anticoagulation Calculator"></iframe></div><div id="hyperlipidemiaPanel"><iframe id="hyperlipidemiaFrame" src="hyperlipidemia.html" title="Hyperlipidemia Decision Support"></iframe></div>
+<div id="echoZScoresPanel">
+  <h1>Echocardiogram Z scores</h1>
+  <p>Reference calculators for pediatric and fetal echocardiographic measurements. Each source retains its own measurement definitions, units, and reference model.</p>
+  <div class="echo-zscore-card">
+    <h2>Pediatric Heart Network (PHN)</h2>
+    <p>PHN Z-score calculator for common pediatric echocardiographic measurements, using body surface area-based reference models.</p>
+    <p><a href="https://www.pediatricheartnetwork.org/z-scores-calculator/" target="_blank" rel="noopener noreferrer">Open PHN Z-score calculator in a new tab</a></p>
+    <iframe id="phnZScoreFrame" src="https://www.pediatricheartnetwork.org/z-scores-calculator/" title="Pediatric Heart Network Echo Z-Score Calculator" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <p class="echo-zscore-note">If the calculator does not display in the embedded window, use the link above.</p>
+  </div>
+  <div class="echo-zscore-card">
+    <h2>Fetal echocardiography Z scores</h2>
+    <p>Fetal echo Z-score calculator from Parameter(z), including fetal cardiac measurements and gestational-age-adjusted references.</p>
+    <p><a href="https://fetal-parameterz.appspot.com/" target="_blank" rel="noopener noreferrer">Open fetal Parameter(z) calculator in a new tab</a></p>
+    <iframe id="fetalZScoreFrame" src="https://fetal-parameterz.appspot.com/" title="Fetal Parameter(z) Echo Z-Score Calculator" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <p class="echo-zscore-note">Legacy calculator notice: Parameter(z) states that this fetal calculator is no longer maintained and may become unavailable. Confirm the selected reference and measurement method before clinical use.</p>
+  </div>
+</div></div>
 <script>
 (function(){
-const cardiacTab=document.getElementById('cardiacTab'), anticoagulationTab=document.getElementById('anticoagulationTab'), hyperlipidemiaTab=document.getElementById('hyperlipidemiaTab');
-const cardiacPanel=document.getElementById('cardiacPanel'), anticoagulationPanel=document.getElementById('anticoagulationPanel'), hyperlipidemiaPanel=document.getElementById('hyperlipidemiaPanel');
-function show(name){const cardiac=name==='cardiac';const anticoag=name==='anticoagulation';cardiacPanel.style.display=cardiac?'block':'none';anticoagulationPanel.style.display=anticoag?'block':'none';hyperlipidemiaPanel.style.display=(!cardiac&&!anticoag)?'block':'none';cardiacTab.classList.toggle('active',cardiac);anticoagulationTab.classList.toggle('active',anticoag);hyperlipidemiaTab.classList.toggle('active',!cardiac&&!anticoag);cardiacTab.setAttribute('aria-selected',String(cardiac));anticoagulationTab.setAttribute('aria-selected',String(anticoag));hyperlipidemiaTab.setAttribute('aria-selected',String(!cardiac&&!anticoag));}
-cardiacTab.addEventListener('click',()=>show('cardiac'));anticoagulationTab.addEventListener('click',()=>show('anticoagulation'));hyperlipidemiaTab.addEventListener('click',()=>show('hyperlipidemia'));
+const tabs={
+  cardiac:{tab:document.getElementById('cardiacTab'),panel:document.getElementById('cardiacPanel')},
+  anticoagulation:{tab:document.getElementById('anticoagulationTab'),panel:document.getElementById('anticoagulationPanel')},
+  hyperlipidemia:{tab:document.getElementById('hyperlipidemiaTab'),panel:document.getElementById('hyperlipidemiaPanel')},
+  echoZScores:{tab:document.getElementById('echoZScoresTab'),panel:document.getElementById('echoZScoresPanel')}
+};
+function show(name){
+  Object.entries(tabs).forEach(([key,item])=>{
+    const active=key===name;
+    item.panel.style.display=active?'block':'none';
+    item.tab.classList.toggle('active',active);
+    item.tab.setAttribute('aria-selected',String(active));
+  });
+}
+Object.entries(tabs).forEach(([key,item])=>item.tab.addEventListener('click',()=>show(key)));
 })();
 </script>
 </body>
