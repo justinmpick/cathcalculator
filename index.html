@@ -2181,14 +2181,60 @@ let x = Math.floor((outW - aW)/2), y = PAD;
     <iframe id="phnZScoreFrame" src="https://www.pediatricheartnetwork.org/z-scores-calculator/" title="Pediatric Heart Network Echo Z-Score Calculator" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
     <p class="echo-zscore-note">If the calculator does not display in the embedded window, use the link above.</p>
   </div>
-  <div class="echo-zscore-card">
+  <div class="echo-zscore-card" id="fetalNativeCalculator">
     <h2>Fetal echocardiography Z scores</h2>
-    <p>Fetal echo Z-score calculator from Parameter(z), including fetal cardiac measurements and gestational-age-adjusted references.</p>
-    <p><a href="https://fetal.parameterz.com/app" target="_blank" rel="noopener noreferrer">Open fetal Parameter(z) calculator in a new tab</a></p>
-    <iframe id="fetalZScoreFrame" src="https://fetal.parameterz.com/app" title="Fetal Parameter(z) Echo Z-Score Calculator" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    <p class="echo-zscore-note">Legacy calculator notice: Parameter(z) states that this fetal calculator is no longer maintained and may become unavailable. Confirm the selected reference and measurement method before clinical use.</p>
+    <p><strong>Schneider et al. (2005)</strong> — 17 published fetal cardiac dimensions. Choose one predictor model; do not mix predictors within a calculation.</p>
+    <div class="form-columns" style="flex-wrap:wrap">
+      <div><label for="schneiderPredictor">Reference predictor</label><select id="schneiderPredictor" class="annotator-input"><option value="fl">Femur length (cm)</option><option value="bpd">Biparietal diameter (cm)</option><option value="ga">Gestational age (completed weeks)</option></select></div>
+      <div><label for="schneiderPredictorValue" id="schneiderPredictorLabel">Femur length (cm)</label><input id="schneiderPredictorValue" class="annotator-input" type="number" min="0.1" step="0.1" placeholder="Enter fetal femur length"></div>
+    </div>
+    <p class="echo-zscore-note">Enter cardiac measurements in cm, except ventricular areas in cm². Great vessels and arterial valves are measured in systole; AV valves and ventricular chambers in diastole. The study included 130 fetuses, 15–39 weeks’ gestation.</p>
+    <div id="schneiderMeasurementFields" class="form-columns" style="flex-wrap:wrap"></div>
+    <button type="button" id="calculateSchneider" class="annotator-btn">Calculate fetal Z scores</button>
+    <button type="button" id="clearSchneider" class="annotator-btn">Clear</button>
+    <div id="schneiderResults" aria-live="polite" class="output" style="display:none"></div>
+    <p class="echo-zscore-note">Reference: Schneider C, et al. Ultrasound Obstet Gynecol. 2005;26:599–605. DOI: 10.1002/uog.2597. This calculator implements the published log–log regressions and root mean square errors. Use within the study’s validated range and verify measurement conventions. This is a reference aid, not a substitute for clinical interpretation.</p>
+  </div>
   </div>
 </div></div>
+<script>
+(function(){
+const models={
+fl:[
+["Aortic valve",-2.274,.8972,.1103,"cm"],["Pulmonary valve",-2.148,.9437,.1110,"cm"],["Ascending aorta",-2.141,.8968,.1225,"cm"],["Main pulmonary artery",-2.072,.9465,.1645,"cm"],["Tricuspid valve",-1.735,.9937,.1386,"cm"],["Mitral valve",-1.550,.8473,.1202,"cm"],["RV end-diastolic dimension",-1.485,.9625,.1435,"cm"],["LV end-diastolic dimension",-1.516,.9554,.1403,"cm"],["RV inlet length",-.8249,.9305,.1520,"cm"],["LV inlet length",-.6751,.8772,.1216,"cm"],["RV area",-2.488,1.905,.2651,"cm²"],["LV area",-2.283,1.823,.2145,"cm²"],["Descending aorta",-2.368,.9415,.1224,"cm"],["Inferior vena cava",-2.502,.8365,.1885,"cm"],["Right pulmonary artery",-2.623,.8685,.1780,"cm"],["Left pulmonary artery",-2.785,.9219,.1935,"cm"],["Arterial duct",-2.251,.7370,.1830,"cm"]],
+bpd:[
+["Aortic valve",-2.848,1.039,.1307,"cm"],["Pulmonary valve",-2.813,1.126,.1171,"cm"],["Ascending aorta",-2.758,1.060,.1227,"cm"],["Main pulmonary artery",-2.774,1.144,.1455,"cm"],["Tricuspid valve",-2.439,1.188,.1456,"cm"],["Mitral valve",-2.118,.9921,.1296,"cm"],["RV end-diastolic dimension",-2.145,1.138,.1525,"cm"],["LV end-diastolic dimension",-2.087,1.080,.1652,"cm"],["RV inlet length",-1.403,1.064,.1661,"cm"],["LV inlet length",-1.262,1.024,.1313,"cm"],["RV area",-3.643,2.165,.3193,"cm²"],["LV area",-3.335,2.042,.2691,"cm²"],["Descending aorta",-2.998,1.101,.1332,"cm"],["Inferior vena cava",-3.159,1.031,.1892,"cm"],["Right pulmonary artery",-3.223,1.025,.1813,"cm"],["Left pulmonary artery",-3.383,1.062,.2001,"cm"],["Arterial duct",-2.694,.8236,.2042,"cm"]],
+ga:[
+["Aortic valve",-5.019,1.263,.1282,"cm"],["Pulmonary valve",-5.114,1.352,.1208,"cm"],["Ascending aorta",-4.886,1.261,.1330,"cm"],["Main pulmonary artery",-5.025,1.347,.1570,"cm"],["Tricuspid valve",-4.766,1.395,.1394,"cm"],["Mitral valve",-4.084,1.173,.1315,"cm"],["RV end-diastolic dimension",-4.455,1.363,.1442,"cm"],["LV end-diastolic dimension",-4.292,1.298,.1560,"cm"],["RV inlet length",-3.566,1.277,.1658,"cm"],["LV inlet length",-3.231,1.193,.1376,"cm"],["RV area",-8.133,2.625,.2957,"cm²"],["LV area",-7.430,2.432,.2564,"cm²"],["Descending aorta",-5.365,1.360,.1216,"cm"],["Inferior vena cava",-5.140,1.201,.1893,"cm"],["Right pulmonary artery",-5.307,1.230,.1802,"cm"],["Left pulmonary artery",-5.390,1.231,.1966,"cm"],["Arterial duct",-4.440,1.013,.1913,"cm"]]
+};
+const names={fl:"Femur length (cm)",bpd:"Biparietal diameter (cm)",ga:"Gestational age (completed weeks)"};
+const predictor=document.getElementById('schneiderPredictor'), predictorValue=document.getElementById('schneiderPredictorValue'), fields=document.getElementById('schneiderMeasurementFields'), results=document.getElementById('schneiderResults');
+function renderFields(){
+ fields.innerHTML=models.fl.map((r,i)=>'<div style="min-width:220px;flex:1"><label for="schneiderM'+i+'">'+r[0]+' ('+r[4]+')</label><input class="annotator-input" style="width:100%;box-sizing:border-box" type="number" min="0" step="0.01" id="schneiderM'+i+'" placeholder="Measurement in '+r[4]+'"></div>').join('');
+}
+function updatePredictor(){const p=predictor.value;document.getElementById('schneiderPredictorLabel').textContent=names[p];predictorValue.placeholder='Enter '+names[p].toLowerCase();}
+predictor.addEventListener('change',updatePredictor);
+document.getElementById('calculateSchneider').addEventListener('click',()=>{
+ const p=predictor.value,x=Number(predictorValue.value);
+ if(!Number.isFinite(x)||x<=0){alert('Enter a valid '+names[p]+'.');return;}
+ const rows=[];
+ models[p].forEach((r,i)=>{
+  const raw=document.getElementById('schneiderM'+i).value;
+  if(raw==='')return;
+  const actual=Number(raw);
+  if(!Number.isFinite(actual)||actual<=0)return;
+  const predictedLog=r[1]+r[2]*Math.log(x);
+  const z=(Math.log(actual)-predictedLog)/r[3];
+  rows.push({name:r[0],actual,unit:r[4],z});
+ });
+ if(!rows.length){alert('Enter at least one cardiac measurement.');return;}
+ results.style.display='block';
+ results.innerHTML='<h3>Schneider et al. (2005) results — '+names[p]+'</h3><table><thead><tr><th>Structure</th><th>Measured</th><th>Z score</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+r.name+'</td><td>'+r.actual.toFixed(2)+' '+r.unit+'</td><td><strong>'+r.z.toFixed(2)+'</strong></td></tr>').join('')+'</tbody></table><p class="echo-zscore-note">Calculated '+rows.length+' measurement(s). Z = [ln(actual) − (c + m × ln(predictor))] / root MSE.</p>';
+});
+document.getElementById('clearSchneider').addEventListener('click',()=>{predictorValue.value='';fields.querySelectorAll('input').forEach(x=>x.value='');results.style.display='none';results.innerHTML='';});
+renderFields();updatePredictor();
+})();
+</script>
 <script>
 (function(){
 const tabs={
