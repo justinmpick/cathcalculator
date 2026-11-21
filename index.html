@@ -257,6 +257,17 @@
 .echo-zscore-card{background:#f8f9fa;border:1px solid #dfe3e8;border-radius:10px;padding:14px;margin:14px 0}
 .echo-zscore-card h2{margin-top:0}
 .echo-zscore-note{font-size:13px;color:#555;line-height:1.45}
+
+/* Echo Z-score layout refinements */
+#phnZScoreFrame{height:1200px;min-height:1200px}
+#fetalNativeCalculator .form-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;align-items:start}
+#fetalNativeCalculator .form-columns>div{min-width:0;flex:initial}
+#fetalNativeCalculator .form-columns label{margin:0 0 6px;display:block;line-height:1.3}
+#fetalNativeCalculator .annotator-input{box-sizing:border-box;width:100%;min-height:40px}
+#schneiderMeasurementFields{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px}
+#schneiderMeasurementFields>div{min-width:0!important;flex:initial!important}
+@media(max-width:700px){#schneiderMeasurementFields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){#fetalNativeCalculator .form-columns,#schneiderMeasurementFields{grid-template-columns:1fr}}
 </style>
 <div id="siteTabs" role="tablist" aria-label="Pediatric cardiac tools">
 <button id="cardiacTab" class="active" role="tab" aria-selected="true" type="button">Cardiac Diagram Editor &amp; Hemodynamics</button>
