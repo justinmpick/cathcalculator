@@ -259,9 +259,11 @@
 .echo-zscore-note{font-size:13px;color:#555;line-height:1.45}
 
 /* Echo Z-score layout refinements */
-#phnZScoreFrame{height:1200px;min-height:1200px}
+#phnZScoreFrame{height:2200px;min-height:2200px}
 #fetalNativeCalculator .form-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;align-items:start}
 #fetalNativeCalculator .form-columns>div{min-width:0;flex:initial}
+#fetalNativeCalculator #schneiderPredictorInputs{background:#eef3f8;border:1px solid #d5dde7;border-radius:8px;padding:14px;margin:0 0 18px}
+#fetalNativeCalculator #schneiderMeasurementFields{background:#fff;border:1px solid #dfe3e8;border-radius:8px;padding:14px}
 #fetalNativeCalculator .form-columns label{margin:0 0 6px;display:block;line-height:1.3}
 #fetalNativeCalculator .annotator-input{box-sizing:border-box;width:100%;min-height:40px}
 #schneiderMeasurementFields{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px}
@@ -2202,7 +2204,7 @@ let x = Math.floor((outW - aW)/2), y = PAD;
   <div class="echo-zscore-card" id="fetalNativeCalculator">
     <h2>Fetal echocardiography Z scores</h2>
     <p><strong>Schneider et al. (2005)</strong> — 17 published fetal cardiac dimensions. Choose one predictor model; do not mix predictors within a calculation.</p>
-    <div class="form-columns" style="flex-wrap:wrap">
+    <div id="schneiderPredictorInputs" class="form-columns" style="flex-wrap:wrap">
       <div><label for="schneiderPredictor">Reference predictor</label><select id="schneiderPredictor" class="annotator-input"><option value="fl">Femur length (cm)</option><option value="bpd">Biparietal diameter (cm)</option><option value="ga">Gestational age (completed weeks)</option></select></div>
       <div><label for="schneiderPredictorValue" id="schneiderPredictorLabel">Femur length (cm)</label><input id="schneiderPredictorValue" class="annotator-input" type="number" min="0.1" step="0.1" placeholder="Enter fetal femur length"></div>
     </div>
